@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=340, initial-scale=1.0">
+  <title>ドリンク選択</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="select-container" id="main-select">
+    <div class="select-title">ドリンクの種類を選択してください。</div>
+    <div class="select-grid">
+      <div class="select-btn hot drink-btn" data-type="hot-coffee">ホット<br>コーヒー</div>
+      <div class="select-btn ice drink-btn" data-type="ice-coffee">アイス<br>コーヒー</div>
+      <div class="select-btn hot drink-btn" data-type="hot-latte">ホット<br>カフェラテ</div>
+      <div class="select-btn ice drink-btn" data-type="ice-latte">アイス<br>カフェラテ</div>
+    </div>
+  </div>
+  <div class="select-container" id="size-select" style="display:none;">
+    <button class="back-btn" id="back-to-main">← 戻る</button>
+    <div class="select-title">サイズを選択してください。</div>
+    <div class="select-grid size-grid">
+      <div class="select-btn size-btn" data-size="large">large<br><span class="size-label">大きめサイズ</span></div>
+      <div class="select-btn size-btn" data-size="regular">regular<br><span class="size-label">ふつうサイズ</span></div>
+    </div>
+  </div>
+  <div class="select-container" id="strength-select" style="display:none;">
+    <button class="back-btn" id="back-to-size">← 戻る</button>
+    <div class="select-title">濃さを選択してください。</div>
+    <div class="select-grid strength-grid">
+      <div class="strength-btn">濃いめ</div>
+      <div class="strength-btn">ふつう</div>
+      <div class="strength-btn">薄め</div>
+    </div>
+  </div>
+  <div class="select-container" id="confirm-select" style="display:none;">
+    <button class="back-btn" id="back-to-prev">← 戻る</button>
+    <div class="select-title">ご確認ください</div>
+    <div class="confirm-content">
+      <div id="confirm-drink"></div>
+      <div id="confirm-size"></div>
+      <div id="confirm-strength" style="display:none;"></div>
+    </div>
+    <button id="confirm-ok-btn" class="select-btn" style="margin-top:24px;">OK</button>
+  </div>
+  <div class="select-container" id="making-select" style="display:none;">
+    <div class="select-title making-title" style="padding-top: 0; display: flex; align-items: center; justify-content: center; height: 100vh; width: 100vw;">現在作っています...</div>
+  </div>
+  <div class="select-container" id="done-select" style="display:none;">
+    <div class="select-title making-title done-title" style="padding-top: 0; display: flex; align-items: center; justify-content: center; height: 100vh; width: 100vw; flex-direction: column;">
+      <span class="done-text">完成しました！</span>
+      <span class="done-text" style="margin-top:32px;">お取り出し下さい。</span>
+    </div>
+  </div>
+  <script>
+    let selectedDrinkType = '';
+    let selectedDrinkLabel = '';
+    let selectedSize = '';
+    let selectedStrength = '';
+    function showConfirm() {
+      // ドリンク名
+      let drinkMap = {
+        'hot-coffee': 'ホットコーヒー',
+        'ice-coffee': 'アイスコーヒー',
+        'hot-latte': 'ホットカフェラテ',
+        'ice-latte': 'アイスカフェラテ'
+      };
+      document.getElementById('confirm-drink').textContent = 'ドリンク: ' + (drinkMap[selectedDrinkType] || '');
+      // サイズ
+      let sizeMap = { 'large': 'large（大きめサイズ）', 'regular': 'regular（ふつうサイズ）' };
+      document.getElementById('confirm-size').textContent = 'サイズ: ' + (sizeMap[selectedSize] || '');
+      // 濃さ
+      if (selectedDrinkType === 'hot-coffee' || selectedDrinkType === 'ice-coffee') {
+        document.getElementById('confirm-strength').style.display = '';
+        document.getElementById('confirm-strength').textContent = '濃さ: ' + (selectedStrength || '');
+      } else {
+        document.getElementById('confirm-strength').style.display = 'none';
+      }
+    }
+    document.querySelectorAll('.drink-btn').forEach(function(btn) {
+      btn.onclick = function() {
+        selectedDrinkType = btn.getAttribute('data-type');
+        selectedDrinkLabel = btn.innerText.replace(/\n/g, ' ');
+        document.getElementById('main-select').style.display = 'none';
+        document.getElementById('size-select').style.display = 'flex';
+        document.getElementById('strength-select').style.display = 'none';
+        document.getElementById('making-select').style.display = 'none';
+        document.getElementById('confirm-select').style.display = 'none';
+        selectedSize = '';
+        selectedStrength = '';
+      };
+    });
+    document.querySelectorAll('.size-btn').forEach(function(btn) {
+      btn.onclick = function() {
+        selectedSize = btn.getAttribute('data-size');
+        if (selectedDrinkType === 'hot-coffee' || selectedDrinkType === 'ice-coffee') {
+          document.getElementById('size-select').style.display = 'none';
+          document.getElementById('strength-select').style.display = 'flex';
+          document.getElementById('making-select').style.display = 'none';
+          document.getElementById('confirm-select').style.display = 'none';
+        } else {
+          document.getElementById('size-select').style.display = 'none';
+          showConfirm();
+          document.getElementById('confirm-select').style.display = 'flex';
+        }
+      };
+    });
+    document.querySelectorAll('.strength-btn').forEach(function(btn) {
+      btn.onclick = function() {
+        selectedStrength = btn.textContent;
+        document.getElementById('strength-select').style.display = 'none';
+        showConfirm();
+        document.getElementById('confirm-select').style.display = 'flex';
+      };
+    });
+    document.getElementById('confirm-ok-btn').onclick = function() {
+      document.getElementById('confirm-select').style.display = 'none';
+      document.getElementById('making-select').style.display = 'flex';
+      document.getElementById('done-select').style.display = 'none';
+      setTimeout(function() {
+        document.getElementById('making-select').style.display = 'none';
+        document.getElementById('done-select').style.display = 'flex';
+      }, 10000);
+    };
+    // 戻るボタンのイベント
+    document.getElementById('back-to-main').onclick = function() {
+      document.getElementById('size-select').style.display = 'none';
+      document.getElementById('main-select').style.display = 'flex';
+      selectedSize = '';
+      selectedStrength = '';
+    };
+    document.getElementById('back-to-size').onclick = function() {
+      document.getElementById('strength-select').style.display = 'none';
+      document.getElementById('size-select').style.display = 'flex';
+      selectedStrength = '';
+    };
+    document.getElementById('back-to-prev').onclick = function() {
+      document.getElementById('confirm-select').style.display = 'none';
+      if (selectedDrinkType === 'hot-coffee' || selectedDrinkType === 'ice-coffee') {
+        document.getElementById('strength-select').style.display = 'flex';
+      } else {
+        document.getElementById('size-select').style.display = 'flex';
+      }
+    };
+  </script>
+</body>
+</html>
